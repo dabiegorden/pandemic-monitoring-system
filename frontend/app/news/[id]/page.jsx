@@ -13,18 +13,24 @@ import {
   Facebook,
   Twitter,
   Linkedin,
+  Bell,
+  BellOff,
 } from "lucide-react";
 import Link from "next/link";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function NewsDetailsPage() {
-  // For client components, useParams() returns a regular object, not a Promise
-  // The Promise-based params are only for Server Components
   const params = useParams();
-  const id = params?.id; // Access id with optional chaining for safety
+  const id = params?.id;
 
   const router = useRouter();
   const [newsDetails, setNewsDetails] = useState(null);
@@ -32,6 +38,29 @@ export default function NewsDetailsPage() {
   const [error, setError] = useState(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [user, setUser] = useState(null);
+  const [smsEnabled, setSmsEnabled] = useState(false);
+
+  useEffect(() => {
+    // Fetch user data to check if SMS notifications are enabled
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/auth/me", {
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
+          setSmsEnabled(!!userData.phone_number);
+        }
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   useEffect(() => {
     if (!id) {
@@ -84,6 +113,15 @@ export default function NewsDetailsPage() {
       month: "long",
       day: "numeric",
     });
+  };
+
+  const handleSmsPreferenceClick = () => {
+    if (!user) {
+      router.push("/sign-in");
+      return;
+    }
+
+    router.push("/profile");
   };
 
   if (loading) {
@@ -147,6 +185,38 @@ export default function NewsDetailsPage() {
               </div>
 
               <div className="flex gap-2">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleSmsPreferenceClick}
+                        className={`whitespace-nowrap ${
+                          smsEnabled ? "bg-blue-50" : ""
+                        }`}
+                      >
+                        {smsEnabled ? (
+                          <>
+                            <Bell className="w-4 h-4 mr-2 text-blue-500" />
+                            SMS On
+                          </>
+                        ) : (
+                          <>
+                            <BellOff className="w-4 h-4 mr-2" />
+                            SMS Off
+                          </>
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {smsEnabled
+                        ? "You will receive SMS notifications for new pandemic updates"
+                        : "Add your phone number in profile to receive SMS notifications"}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
                 <div className="relative">
                   <Button
                     variant="outline"

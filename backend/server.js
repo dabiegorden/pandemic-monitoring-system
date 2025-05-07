@@ -79,8 +79,14 @@ app.use("/api", notificationRoutes);
 app.use("/api/community", communityRoutes);
 app.use("/api/model", modelRoutes);
 
+// Health check route
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", message: "Server is running" });
+});
+
 // Start the server (Use `server.listen`, NOT `app.listen`)
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`SMS notifications enabled with Twilio`);
 });

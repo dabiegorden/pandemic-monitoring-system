@@ -21,6 +21,7 @@ export default function SignUpForm() {
     name: "",
     email: "",
     password: "",
+    phone_number: "", // Added phone_number field
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -48,6 +49,16 @@ export default function SignUpForm() {
     }
     if (formData.password.length < 8) {
       setError("Password must be at least 8 characters long");
+      return false;
+    }
+    // Phone number validation (optional field)
+    if (
+      formData.phone_number &&
+      !/^\+[1-9]\d{1,14}$/.test(formData.phone_number)
+    ) {
+      setError(
+        "Please enter a valid phone number in international format (e.g., +1234567890)"
+      );
       return false;
     }
     return true;
@@ -138,6 +149,24 @@ export default function SignUpForm() {
                   placeholder="••••••••"
                   disabled={loading || success}
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone_number" className="text-gray-700">
+                  Phone Number (for SMS alerts)
+                </Label>
+                <Input
+                  id="phone_number"
+                  type="tel"
+                  name="phone_number"
+                  value={formData.phone_number}
+                  onChange={handleChange}
+                  placeholder="+1234567890"
+                  disabled={loading || success}
+                />
+                <p className="text-xs text-gray-500">
+                  Optional. Enter in international format (e.g., +1234567890) to
+                  receive SMS alerts about pandemic updates.
+                </p>
               </div>
               {error && (
                 <Alert variant="destructive">

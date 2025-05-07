@@ -1,20 +1,21 @@
 const express = require("express");
 const router = express.Router();
-const db = require("./db"); // Database connection module
-const nodemailer = require("nodemailer"); // Assuming nodemailer is already set up
-const dotenv = require("dotenv"); // Load environment variables from .env file
-const Sentiment = require("sentiment"); // Add sentiment analysis library
+const db = require("./db");
+const nodemailer = require("nodemailer");
+const dotenv = require("dotenv");
+const Sentiment = require("sentiment");
 const sentiment = new Sentiment();
-const natural = require("natural"); // Add natural language processing library
-const stopwords = require("stopwords").english; // Common English stopwords
-dotenv.config(); // Load environment variables from .env file
+const natural = require("natural");
+const stopwords = require("stopwords").english;
+const { sendBulkNewsNotifications } = require("./sms-service");
+dotenv.config();
 
 // Create the transporter
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER, // Your email from environment variables
-    pass: process.env.EMAIL_PASSWORD, // App-specific password or email password
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
   },
 });
 
@@ -37,7 +38,7 @@ const sendOutbreakNotification = async (newsTitle, newsDescription) => {
     // Loop through all users and send an email to each one
     for (const user of users) {
       const mailOptions = {
-        from: process.env.EMAIL_USER, // Your sender email address from nodemailer config
+        from: process.env.EMAIL_USER,
         to: user.email,
         subject: subject,
         text: text,
@@ -95,98 +96,91 @@ const extractKeywords = (text) => {
   return sortedWords.slice(0, 30); // Return top 30 keywords
 };
 
+// Define topic categories and their related keywords
+const topicKeywords = {
+  "COVID-19": ["covid", "coronavirus", "pandemic", "virus", "omicron", "delta"],
+  Vaccination: [
+    "vaccine",
+    "vaccination",
+    "booster",
+    "immunization",
+    "doses",
+    "pfizer",
+    "moderna",
+  ],
+  Treatment: [
+    "treatment",
+    "therapy",
+    "medication",
+    "drug",
+    "cure",
+    "antibiotics",
+    "antiviral",
+  ],
+  Prevention: [
+    "prevention",
+    "protect",
+    "mask",
+    "distance",
+    "hygiene",
+    "sanitizer",
+  ],
+  Research: [
+    "research",
+    "study",
+    "trial",
+    "clinical",
+    "scientists",
+    "laboratory",
+    "experiment",
+  ],
+  "Public Health": [
+    "public",
+    "community",
+    "population",
+    "global",
+    "world",
+    "national",
+    "international",
+  ],
+  Healthcare: [
+    "hospital",
+    "clinic",
+    "doctor",
+    "nurse",
+    "medical",
+    "healthcare",
+    "patient",
+  ],
+  "Mental Health": [
+    "mental",
+    "anxiety",
+    "depression",
+    "stress",
+    "psychological",
+    "therapy",
+  ],
+  Nutrition: [
+    "nutrition",
+    "diet",
+    "food",
+    "eating",
+    "vitamin",
+    "mineral",
+    "supplement",
+  ],
+  Exercise: [
+    "exercise",
+    "fitness",
+    "physical",
+    "activity",
+    "workout",
+    "training",
+  ],
+};
+
 // Function to identify topics from keywords
 const identifyTopics = (keywords) => {
-  // Define topic categories and their related keywords
-  const topicKeywords = {
-    "COVID-19": [
-      "covid",
-      "coronavirus",
-      "pandemic",
-      "virus",
-      "omicron",
-      "delta",
-    ],
-    Vaccination: [
-      "vaccine",
-      "vaccination",
-      "booster",
-      "immunization",
-      "doses",
-      "pfizer",
-      "moderna",
-    ],
-    Treatment: [
-      "treatment",
-      "therapy",
-      "medication",
-      "drug",
-      "cure",
-      "antibiotics",
-      "antiviral",
-    ],
-    Prevention: [
-      "prevention",
-      "protect",
-      "mask",
-      "distance",
-      "hygiene",
-      "sanitizer",
-    ],
-    Research: [
-      "research",
-      "study",
-      "trial",
-      "clinical",
-      "scientists",
-      "laboratory",
-      "experiment",
-    ],
-    "Public Health": [
-      "public",
-      "community",
-      "population",
-      "global",
-      "world",
-      "national",
-      "international",
-    ],
-    Healthcare: [
-      "hospital",
-      "clinic",
-      "doctor",
-      "nurse",
-      "medical",
-      "healthcare",
-      "patient",
-    ],
-    "Mental Health": [
-      "mental",
-      "anxiety",
-      "depression",
-      "stress",
-      "psychological",
-      "therapy",
-    ],
-    Nutrition: [
-      "nutrition",
-      "diet",
-      "food",
-      "eating",
-      "vitamin",
-      "mineral",
-      "supplement",
-    ],
-    Exercise: [
-      "exercise",
-      "fitness",
-      "physical",
-      "activity",
-      "workout",
-      "training",
-    ],
-  };
-
   // Count keyword occurrences for each topic
   const topicCounts = {};
 
@@ -321,94 +315,6 @@ router.get("/trends/sentiment", async (req, res) => {
 
     // Calculate keyword sentiment
     const keywordSentiment = {};
-    const topicKeywords = {
-      "COVID-19": [
-        "covid",
-        "coronavirus",
-        "pandemic",
-        "virus",
-        "omicron",
-        "delta",
-      ],
-      Vaccination: [
-        "vaccine",
-        "vaccination",
-        "booster",
-        "immunization",
-        "doses",
-        "pfizer",
-        "moderna",
-      ],
-      Treatment: [
-        "treatment",
-        "therapy",
-        "medication",
-        "drug",
-        "cure",
-        "antibiotics",
-        "antiviral",
-      ],
-      Prevention: [
-        "prevention",
-        "protect",
-        "mask",
-        "distance",
-        "hygiene",
-        "sanitizer",
-      ],
-      Research: [
-        "research",
-        "study",
-        "trial",
-        "clinical",
-        "scientists",
-        "laboratory",
-        "experiment",
-      ],
-      "Public Health": [
-        "public",
-        "community",
-        "population",
-        "global",
-        "world",
-        "national",
-        "international",
-      ],
-      Healthcare: [
-        "hospital",
-        "clinic",
-        "doctor",
-        "nurse",
-        "medical",
-        "healthcare",
-        "patient",
-      ],
-      "Mental Health": [
-        "mental",
-        "anxiety",
-        "depression",
-        "stress",
-        "psychological",
-        "therapy",
-      ],
-      Nutrition: [
-        "nutrition",
-        "diet",
-        "food",
-        "eating",
-        "vitamin",
-        "mineral",
-        "supplement",
-      ],
-      Exercise: [
-        "exercise",
-        "fitness",
-        "physical",
-        "activity",
-        "workout",
-        "training",
-      ],
-    };
     keywords.slice(0, 15).forEach((keyword) => {
       const keywordArticles = newsArticles.filter((article) =>
         (article.title + " " + article.description)
@@ -583,18 +489,31 @@ router.post("/", async (req, res) => {
       sentimentResult.classification,
     ]);
 
-    // If news is added successfully, trigger email notifications
+    // If news is added successfully, trigger notifications
     if (result.affectedRows > 0) {
       console.log("News added successfully, sending notifications...");
 
-      // Trigger the email notifications to all users
+      // Fetch all users with phone numbers for SMS notifications
+      const [usersWithPhones] = await db.query(
+        "SELECT id, name, email, phone_number FROM users WHERE phone_number IS NOT NULL"
+      );
+
+      // Send SMS notifications to all users with phone numbers
+      if (usersWithPhones.length > 0) {
+        await sendBulkNewsNotifications(usersWithPhones, title, description);
+        console.log(
+          `SMS notifications sent to ${usersWithPhones.length} users`
+        );
+      }
+
+      // Trigger the email notifications to all users (keep existing email functionality)
       await sendOutbreakNotification(title, description);
 
       // Send success response
       return res.status(201).json({
         id: result.insertId,
         sentiment: sentimentResult,
-        message: "News added successfully, emails sent!",
+        message: `News added successfully! Notifications sent via email and SMS to ${usersWithPhones.length} users.`,
       });
     } else {
       return res.status(400).json({ error: "Failed to add news." });
