@@ -62,7 +62,7 @@ io.on("connection", (socket) => {
   console.log("     New WebSocket Client Connected!");
 
   socket.on("disconnect", () => {
-    console.log("    Client Disconnected");
+    console.log("Client Disconnected");
   });
 });
 

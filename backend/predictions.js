@@ -41,7 +41,7 @@ router.post("/", async (req, res) => {
     `;
 
     // Set up the GoogleGenerativeAI model
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     // Use the model to generate content based on the prompt
     const result = await model.generateContent(prompt);
