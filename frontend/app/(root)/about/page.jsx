@@ -12,6 +12,7 @@ import Divide1 from "@/components/divide1";
 import Divide2 from "@/components/divide2";
 import DividerPage from "@/components/divider";
 import System from "@/components/how_system_work";
+import Link from "next/link";
 
 const AboutPage = () => {
   const animationVariants = {
@@ -48,12 +49,12 @@ const AboutPage = () => {
             A cutting-edge platform designed to track, predict, and respond to
             global health crises with unprecedented accuracy and speed.
           </p>
-          <a
+          <Link
             href="#learnmore"
-            className="px-6 py-3 bg-orange-600 text-white rounded-full text-base md:text-lg font-semibold shadow-lg hover:bg-orange-700 transition-all transform hover:-translate-y-1 hover:scale-105"
+            className="px-6 py-3 bg-orange-600 text-white rounded-full text-base md:text-lg font-semibold shadow-lg hover:bg-orange-700 transition-all transform hover:-translate-y-1 hover:scale-105 mb-4"
           >
             Explore Our Approach
-          </a>
+          </Link>
         </div>
       </motion.div>
 
