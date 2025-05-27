@@ -1,10 +1,11 @@
 {
-  "name": "Real-time pandemic monitoring system",
+  "name": "backend",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "update-sentiment": "node update-sentiment.js"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +15,7 @@
     "@google/generative-ai": "^0.24.1",
     "@mapbox/node-pre-gyp": "^2.0.0",
     "apos-to-lex-form": "^1.0.5",
+    "axios": "^1.9.0",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
     "body-parser": "^2.2.0",

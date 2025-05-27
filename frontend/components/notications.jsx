@@ -48,7 +48,7 @@ const Notifications = () => {
   }, []);
 
   return (
-    <div className="relative">
+    <div className="relative z-[99999]">
       {/* Enhanced Bell Icon with Badge */}
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -64,7 +64,7 @@ const Notifications = () => {
 
       {/* Enhanced Notifications Dropdown */}
       {isOpen && (
-        <Card className="absolute right-0 w-96 mt-3 bg-white rounded-lg shadow-xl overflow-hidden z-50 border border-gray-200">
+        <Card className="absolute right-0 w-96 mt-3 bg-white rounded-lg shadow-xl overflow-hidden z-[99999] border border-gray-200">
           <div className="p-4 bg-gray-50 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-800">
               Notifications

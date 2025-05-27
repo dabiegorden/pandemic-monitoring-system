@@ -21,7 +21,7 @@ export default function SignUpForm() {
     name: "",
     email: "",
     password: "",
-    phone_number: "", // Added phone_number field
+    phone_number: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,7 +31,7 @@ export default function SignUpForm() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (error) setError(""); // Reset error when user types
+    if (error) setError("");
   };
 
   const validateForm = () => {
@@ -51,13 +51,12 @@ export default function SignUpForm() {
       setError("Password must be at least 8 characters long");
       return false;
     }
-    // Phone number validation (optional field)
     if (
       formData.phone_number &&
-      !/^\+[1-9]\d{1,14}$/.test(formData.phone_number)
+      !/^(\+?233\d{9})$/.test(formData.phone_number)
     ) {
       setError(
-        "Please enter a valid phone number in international format (e.g., +1234567890)"
+        "Phone number must start with 233 and be 12 digits long (e.g., 233501234567)"
       );
       return false;
     }
@@ -72,12 +71,18 @@ export default function SignUpForm() {
     setError("");
     setSuccess(false);
 
+    // Normalize phone number (remove leading + if present)
+    const sanitizedData = {
+      ...formData,
+      phone_number: formData.phone_number?.replace(/^\+/, "") || undefined,
+    };
+
     try {
       const response = await fetch("http://localhost:5000/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-        credentials: "include", // Include cookies in the request
+        body: JSON.stringify(sanitizedData),
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -86,7 +91,7 @@ export default function SignUpForm() {
       }
 
       setSuccess(true);
-      setTimeout(() => router.push("/sign-in"), 2000); // Redirect to sign-in
+      setTimeout(() => router.push("/sign-in"), 2000);
     } catch (err) {
       setError(err.message || "An error occurred, please try again.");
     } finally {
@@ -152,7 +157,7 @@ export default function SignUpForm() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone_number" className="text-gray-700">
-                  Phone Number (for SMS alerts)
+                  Phone Number
                 </Label>
                 <Input
                   id="phone_number"
@@ -160,13 +165,9 @@ export default function SignUpForm() {
                   name="phone_number"
                   value={formData.phone_number}
                   onChange={handleChange}
-                  placeholder="+1234567890"
+                  placeholder="233501234567"
                   disabled={loading || success}
                 />
-                <p className="text-xs text-gray-500">
-                  Optional. Enter in international format (e.g., +1234567890) to
-                  receive SMS alerts about pandemic updates.
-                </p>
               </div>
               {error && (
                 <Alert variant="destructive">
@@ -188,7 +189,7 @@ export default function SignUpForm() {
               >
                 {loading ? "Signing Up..." : "Sign Up"}
               </Button>
-              <div className="">
+              <div>
                 <span>
                   Already have an account?{" "}
                   <Link href="/sign-in" className="text-blue-600">
